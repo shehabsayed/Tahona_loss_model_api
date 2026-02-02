@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import pandas as pd
-
+from utils.data_loader import load_today_data
+from utils.ingesters.factory import DataIngester
 from utils.make_prediction import predict_from_raw
 
 app = FastAPI(title="Chicken Loss Prediction API")
@@ -21,7 +22,7 @@ def health_check():
 @app.post("/predict")
 def predict(request: PredictionRequest):
     # Convert JSON → DataFrame
-    df = pd.read_csv(r'E:\Work\Notebooks\Tahoona\Final_Model\df_test_api.csv')
+    df = DataIngester.load_today()
     ids = request.data
     df = df[df['placement_id'].isin(ids)].reset_index(drop=True)
 

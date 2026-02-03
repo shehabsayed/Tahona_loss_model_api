@@ -35,3 +35,5 @@ categorical_features = [
     "house_id",
     "farm_id"
 ]
+
+TARGET = "daily_loss"

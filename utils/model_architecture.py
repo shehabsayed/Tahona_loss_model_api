@@ -1,14 +1,14 @@
-import tensorflow as tf
+import keras
 from tensorflow.keras import layers, Model, Input
 from tensorflow.keras.layers import (
     LSTM, Dense, Dropout, Add,
-    TimeDistributed, LayerNormalization
+    TimeDistributed, LayerNormalization, callbacks
 )
 from tcn import TCN
 from custom_layers import SqueezeLastDim, VectorQuantizer
 
 
-def build_lstm_tcn_hybrid_model(
+def build_model(
     input_shape,
     PAD_VALUE,
     num_vq_embeddings=64,
@@ -62,3 +62,32 @@ def build_lstm_tcn_hybrid_model(
 
     model = Model(inputs, outputs)
     return model
+
+
+
+def compile_model(model):
+    optimizer = keras.optimizers.Adam(learning_rate=0.0001)
+
+    model.compile(
+        optimizer=optimizer,
+        loss='mae',
+        metrics=['mae']
+    )
+
+    early_stopping = callbacks.EarlyStopping(
+        monitor='val_loss',
+        patience=3,
+        restore_best_weights=True,
+        verbose=1
+    )
+
+    reduce_lr = callbacks.ReduceLROnPlateau(
+        monitor='val_loss',
+        factor=0.4,
+        patience=3,
+        min_lr=1e-6,
+        verbose=1
+    )
+    
+    return model, early_stopping, reduce_lr
+    

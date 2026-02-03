@@ -15,6 +15,7 @@ class DataIngester:
         ".xls": ExcelIngester,
         ".parquet": ParquetIngester,
         ".ftr": FeatherIngester,
+        ".ftr.gz": FeatherIngester,
         ".feather": FeatherIngester,
     }
 

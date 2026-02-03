@@ -39,9 +39,8 @@ def add_season_encoded(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df.copy()
     df["the_date"] = pd.to_datetime(df["the_date"])
-    df["season"] = df["the_date"].dt.month.apply(get_season)
-    df["season_encoded"] = df["season"].map(season_mapping)
-    df = df.drop(columns=["season"])
+    df["season_encoded"] = df["the_date"].dt.month.apply(get_season).map(season_mapping)
+
 
     return df
 

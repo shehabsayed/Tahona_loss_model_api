@@ -1,21 +1,18 @@
+import os
+os.environ['PYTHONHASHSEED'] = '42'
+os.environ['TF_DETERMINISTIC_OPS'] = '1'
+os.environ['TF_CUDNN_DETERMINISTIC'] = '-1'
+
+import random
+import tensorflow as tf
+import numpy as np
+random.seed(42)
+np.random.seed(42)
+tf.random.set_seed(42)
+
 import pandas as pd
 
-# Features to be used in the model
-FEATURES = [
-    "placement_id",
-    "age",
-    "temperature_min",
-    "humidity_morning",
-    "daily_weight",
-    "daily_first_feed_intake",
-    "daily_second_feed_intake",
-    "daily_mortality",
-    "total_meds",
-    "birds_density",
-    "season_encoded",
-    "house_id",
-    "farm_id"
-]
+
 
 # Helper function to determine the season from the month
 def get_season(month: int) -> str:
@@ -123,14 +120,14 @@ def remove_extra_days(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # Main function to build the feature set
-def build_features(df: pd.DataFrame) -> pd.DataFrame:
+def build_features(df: pd.DataFrame, features) -> pd.DataFrame:
     df = add_season_encoded(df)
     df = add_total_meds(df)
     df = handle_weights(df)
     df = add_birds_density(df)
     df = remove_extra_days(df)
-    missing = set(FEATURES) - set(df.columns)
+    missing = set(features) - set(df.columns)
     if missing:
         raise ValueError(f"Missing required features: {missing}")
 
-    return df[FEATURES]
+    return df[features]

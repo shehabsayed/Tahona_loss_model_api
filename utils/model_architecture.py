@@ -1,11 +1,23 @@
+import os
+os.environ['PYTHONHASHSEED'] = '42'
+os.environ['TF_DETERMINISTIC_OPS'] = '1'
+os.environ['TF_CUDNN_DETERMINISTIC'] = '-1'
+
+import random
+import tensorflow as tf
+import numpy as np
+random.seed(42)
+np.random.seed(42)
+tf.random.set_seed(42)
+
 import keras
-from tensorflow.keras import layers, Model, Input
+from tensorflow.keras import layers, Model, Input, callbacks
 from tensorflow.keras.layers import (
     LSTM, Dense, Dropout, Add,
-    TimeDistributed, LayerNormalization, callbacks
+    TimeDistributed, LayerNormalization
 )
 from tcn import TCN
-from custom_layers import SqueezeLastDim, VectorQuantizer
+from utils.custom_layers import SqueezeLastDim, VectorQuantizer
 
 
 def build_model(
@@ -34,9 +46,9 @@ def build_model(
 
     # LSTM branch
     lstm_out = LSTM(64, return_sequences=True)(tcn_out)
-    lstm_out = Dropout(0.2)(lstm_out)
+    lstm_out = Dropout(0.2, seed=42)(lstm_out)
     lstm_out = LSTM(64, return_sequences=True)(lstm_out)
-    lstm_out = Dropout(0.2)(lstm_out)
+    lstm_out = Dropout(0.2, seed=42)(lstm_out)
 
     # Residual connection
     x = Add()([lstm_out, tcn_out])

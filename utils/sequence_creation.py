@@ -1,4 +1,14 @@
+import os
+os.environ['PYTHONHASHSEED'] = '42'
+os.environ['TF_DETERMINISTIC_OPS'] = '1'
+os.environ['TF_CUDNN_DETERMINISTIC'] = '-1'
+
+import random
+import tensorflow as tf
 import numpy as np
+random.seed(42)
+np.random.seed(42)
+tf.random.set_seed(42)
 
 def create_sequences_for_training(df, input_scaler, output_scaler,
                      numeric_features, categorical_features,

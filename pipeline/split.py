@@ -1,15 +1,39 @@
+import os
+os.environ['PYTHONHASHSEED'] = '42'
+os.environ['TF_DETERMINISTIC_OPS'] = '1'
+os.environ['TF_CUDNN_DETERMINISTIC'] = '-1'
+
+import random
+import tensorflow as tf
+import numpy as np
+random.seed(42)
+np.random.seed(42)
+tf.random.set_seed(42)
+
+
 from utils.train_data_loading import load_for_training
-from turtle import pd
-from pathlib import Path
+from utils.feature_selection import add_season_encoded, add_birds_density, handle_weights, add_total_meds, remove_extra_days
+from utils.settings import TRAIN_FEATURES
+from utils.imputation import impute_weather
+from pipeline.preprocessing import remove_nulls_bird_density, remove_nonpositive_live_birds, remove_outliers, remove_small_placements
+import pandas as pd
+
 
 def split_for_training():
-    df = load_for_training()
-    
-    df["the_date"] = pd.to_datetime(df["the_date"])
 
-    df = df.sort_values(
-        ["placement_id", "the_date"]
-    ).reset_index(drop=True)
+    df = load_for_training()
+
+    df = remove_small_placements(df)
+    df = remove_extra_days(df)
+    df = remove_outliers(df)
+    df = add_total_meds(df)
+    df = remove_nonpositive_live_birds(df)
+    df = handle_weights(df)
+    df = add_birds_density(df)
+    df = remove_nulls_bird_density(df)
+    df = add_season_encoded(df)
+    df = df[TRAIN_FEATURES]
+    df = impute_weather(df)
 
     # Placement start date
     placement_start_dates = (
@@ -34,7 +58,6 @@ def split_for_training():
 
     df_train = df[df["placement_id"].isin(train_placements)].copy()
     df_test  = df[df["placement_id"].isin(test_placements)].copy()
-
 
     return df_train, df_test
 
